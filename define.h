@@ -1,0 +1,25 @@
+#include <XnCppWrapper.h>
+
+#define CHECK_RC(rc, what)                                             \
+    if (rc != XN_STATUS_OK)                                            \
+    {                                                                                                                                         \
+        printf("%s failed: %s\n", what, xnGetStatusString(rc));        \
+        return rc;                                                     \
+    }
+
+xn::Context        *g_context; 
+xn::DepthGenerator *g_depthGenerator;
+xn::UserGenerator  *g_userGenerator;
+
+XnBool g_bNeedPose = FALSE;
+XnChar g_strPose[20] = "";
+XnUserID g_trackedUser = NULL;
+
+typedef enum
+{
+    IN_SESSION,
+    NOT_IN_SESSION,
+    QUICK_REFOCUS
+} SessionState;
+
+SessionState g_sessionState = NOT_IN_SESSION;
