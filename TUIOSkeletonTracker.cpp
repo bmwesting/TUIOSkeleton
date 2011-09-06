@@ -36,6 +36,8 @@ TUIOSkeletonTracker::TUIOSkeletonTracker()
     
     threshold_ = 200;
     
+    confidenceTracking_ = TRUE;
+    
     if(!TuioServer_->isConnected())
     {
         printf("Tuio Server unable to connect.\n");
@@ -50,7 +52,6 @@ TUIOSkeletonTracker::~TUIOSkeletonTracker()
 void TUIOSkeletonTracker::update(XnVector3D* joints, XnConfidence* conf)
 {
 
-    //printf("Number of cursors: %d\n", TuioServer_->getTuioCursors().size());
     // Do we send an update to the TuioServer?
     bool stateChanged = FALSE;
 
@@ -61,9 +62,19 @@ void TUIOSkeletonTracker::update(XnVector3D* joints, XnConfidence* conf)
     int distanceLeft, distanceRight;
     distanceLeft  = joints[0].Z - joints[1].Z;
     distanceRight = joints[2].Z - joints[3].Z;
+    
+    bool confidenceLeft = TRUE;
+    bool confidenceRight = TRUE;
+    
+    // we are taking into account the confidence of the joints position
+    if (confidenceTracking_)
+    {
+        if (conf[0] <= 0.5 || conf[1] <= 0.5) confidenceLeft = FALSE;
+        if (conf[1] <= 0.5 || conf[3] <= 0.5) confidenceRight = FALSE;
+    }
         
     //if elbow - hand less than threshold, remove from cursors (not reaching)
-    if(distanceLeft < threshold_)
+    if(distanceLeft < threshold_ || !confidenceLeft)
     {
         // check to make sure cursor is in list before removing
         if (leftCursor_ != NULL)
@@ -75,7 +86,7 @@ void TUIOSkeletonTracker::update(XnVector3D* joints, XnConfidence* conf)
             stateChanged = TRUE;
         }
     }
-    if(distanceRight < threshold_)
+    if(distanceRight < threshold_ || !confidenceRight)
     {
         // check to make sure cursor is in list before removing
         if (rightCursor_ != NULL)
@@ -89,7 +100,7 @@ void TUIOSkeletonTracker::update(XnVector3D* joints, XnConfidence* conf)
     }
     
     //if elbow - hand greater than threshold, add cursor to list (reaching gesture)
-    if(distanceLeft >= threshold_)
+    if(distanceLeft >= threshold_ && confidenceLeft)
     {
         // cursor doesnt exist yet, add it
         if(leftCursor_ == NULL)
@@ -111,7 +122,7 @@ void TUIOSkeletonTracker::update(XnVector3D* joints, XnConfidence* conf)
 
         }
     }
-    if(distanceRight >= threshold_)
+    if(distanceRight >= threshold_ && confidenceRight)
     {
         // cursor doesnt exist yet, add it
         if(rightCursor_ == NULL)

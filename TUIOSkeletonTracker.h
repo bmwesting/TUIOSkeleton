@@ -48,6 +48,8 @@ class TUIOSkeletonTracker
         int threshold_;
         float xMax_, yMax_;
         
+        bool confidenceTracking_;
+        
         TUIO::TuioServer *TuioServer_;
     
 };
