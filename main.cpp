@@ -9,6 +9,7 @@
  */
 
 #include "define.h"
+#include "TUIOSkeletonTracker.h"
 
 //Callbacks for calibration events
 void XN_CALLBACK_TYPE UserCalibration_CalibrationStart(xn::SkeletonCapability& capability, XnUserID nId, void* pCookie)
@@ -147,7 +148,9 @@ int main(int argc, char** argv)
     XnUserID users[20];
     XnUInt16 nUsers;
     
-    XnSkeletonJointPosition joint;
+    XnSkeletonJointPosition joint[4];
+    XnPoint3D points[4];
+    XnConfidence confidence[4];
     
     XnCallbackHandle hUserCallbacks, hCalibrationStart, hCalibrationComplete, hPoseDetected, hCalibrationInProgress, hPoseInProgress;
     
@@ -168,34 +171,47 @@ int main(int argc, char** argv)
         g_userGenerator->GetSkeletonCap().GetCalibrationPose(g_strPose);
     }
     
-    //g_userGenerator->GetSkeletonCap().RegisterToCalibrationInProgress(MyCalibrationInProgress, NULL, hCalibrationInProgress);
-    //g_UserGenerator.GetPoseDetectionCap().RegisterToPoseInProgress(MyPoseInProgress, NULL, hPoseInProgress);
-    
     g_userGenerator->GetSkeletonCap().SetSkeletonProfile(XN_SKEL_PROFILE_ALL);
     
-    //TUIOTracker = new TUIOPointTracker(depthGenerator);
-    //TUIOTracker->SetResolutionLimits(depthMD.XRes(), depthMD.YRes());
-            
+    TUIOSkeletonTracker* tracker = new TUIOSkeletonTracker();
+    tracker->setResolutionLimits(depthMD.XRes(), depthMD.YRes());
+    //printf("full res: %d,%d\n", depthMD.FullXRes(), depthMD.FullYRes());
     g_context->StartGeneratingAll();
         
     while(1)
     {
         // Read next available data
         g_context->WaitOneUpdateAll(*g_userGenerator);
-        //sleep(1);
-        //printf("Number of users: %d\n", g_userGenerator->GetNumberOfUsers());
-        //nUsers = g_userGenerator->GetNumberOfUsers();
         
         nUsers = g_userGenerator->GetNumberOfUsers();
         g_userGenerator->GetUsers(users, nUsers);
-        //printf("Number of users: %d\n", nUsers);
+        
         for(int i = 0; i < nUsers; i++)
         {
-            //printf("users[%d] = %d\n", i, users[i]);
             if(g_userGenerator->GetSkeletonCap().IsTracking(users[i]))
             {
-                g_userGenerator->GetSkeletonCap().GetSkeletonJointPosition(users[i], XN_SKEL_RIGHT_HAND, joint);
-                printf("hand position: %f, %f, %f confidence: %f\n", joint.position.X, joint.position.Y, joint.position.Z, joint.fConfidence);
+                g_userGenerator->GetSkeletonCap().GetSkeletonJointPosition(users[i], XN_SKEL_LEFT_ELBOW, joint[0]);
+                g_userGenerator->GetSkeletonCap().GetSkeletonJointPosition(users[i], XN_SKEL_LEFT_HAND, joint[1]);
+                g_userGenerator->GetSkeletonCap().GetSkeletonJointPosition(users[i], XN_SKEL_RIGHT_ELBOW, joint[2]);
+                g_userGenerator->GetSkeletonCap().GetSkeletonJointPosition(users[i], XN_SKEL_RIGHT_HAND, joint[3]);
+                
+                points[0] = joint[0].position;
+                points[1] = joint[1].position;
+                points[2] = joint[2].position;
+                points[3] = joint[3].position;
+                
+                confidence[0] = joint[0].fConfidence;
+                confidence[1] = joint[1].fConfidence;
+                confidence[2] = joint[2].fConfidence;
+                confidence[3] = joint[3].fConfidence;
+
+                // Convert X, Y, Z positions to pixel coordinates
+                g_depthGenerator->ConvertRealWorldToProjective(4, points, points);
+                
+                //if(confidence[1] > 0.5) printf("left hand -> %f,%f,%f\n", points[1].X, points[1].Y, points[1].Z);
+                
+                tracker->update(points, confidence);
+
             }
         }
     }

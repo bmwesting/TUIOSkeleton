@@ -8,8 +8,10 @@
  * Author: Brandt Westing, TACC
  */
 
-#IFNDEF TUIO_SKELETON_TRACKER_H_
-#DEFINE TUIO_SKELETON_TRACKER_H_
+#ifndef TUIO_SKELETON_TRACKER_H_
+#define TUIO_SKELETON_TRACKER_H_
+
+#include <string>
 
 class XnSkeletonJointPosition;
 
@@ -32,20 +34,22 @@ class TUIOSkeletonTracker
          * joints[2] = right elbow
          * joints[3] = right hand
          */
-        void update(XnSkeletonJointPosition* joints);
+        void update(XnVector3D* joints, XnConfidence* confidence);
+        void setResolutionLimits(int x, int y);
         
     private:
     
         unsigned int port_;
         std::string targetIP_;
         
-        long leftID_;
-        long rightID_;
+        TUIO::TuioCursor* leftCursor_;
+        TUIO::TuioCursor* rightCursor_;
         
         int threshold_;
+        float xMax_, yMax_;
         
         TUIO::TuioServer *TuioServer_;
     
 };
 
-#ENDIF
+#endif

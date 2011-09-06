@@ -21,17 +21,9 @@ link_directories(${TUIOSkeleton_BINARY_DIR}/oscpack)
 include_directories("/usr/include/ni")
 set(LIBS ${LIBS} OpenNI)
 
-#NITE
-#include_directories("/usr/include/nite")
-#set(LIBS ${LIBS} XnVNite_1_4_1)
-
-#OpenCV
-#FIND_PACKAGE(OpenCV REQUIRED)
-#set(LIBS ${LIBS} ${OpenCV_LIBS})
-
 set(SRCS
     main.cpp
-    #TUIOPointTracker.cpp
+    TUIOSkeletonTracker.cpp
 )
 
 add_executable(TUIOSkeleton ${SRCS})

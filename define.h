@@ -1,3 +1,6 @@
+#ifndef DEFINE_H_
+#define DEFINE_H_
+
 #include <XnCppWrapper.h>
 
 #define CHECK_RC(rc, what)                                             \
@@ -23,3 +26,5 @@ typedef enum
 } SessionState;
 
 SessionState g_sessionState = NOT_IN_SESSION;
+
+#endif
