@@ -55,21 +55,21 @@ void TUIOSkeletonTracker::update(XnVector3D* joints, XnConfidence* conf)
     bool stateChanged = FALSE;
 
     TUIO::TuioTime time = TUIO::TuioTime::getSessionTime();
-    TuioServer_->initFrame(time);
+    //TuioServer_->initFrame(time);
 
     //Calculate distances
     int distanceLeft, distanceRight;
     distanceLeft  = joints[0].Z - joints[1].Z;
     distanceRight = joints[2].Z - joints[3].Z;
-    
-    //printf(" left distance = %d, right distance %d \n", distanceLeft, distanceRight);
-    
+        
     //if elbow - hand less than threshold, remove from cursors (not reaching)
     if(distanceLeft < threshold_)
     {
         // check to make sure cursor is in list before removing
         if (leftCursor_ != NULL)
         {
+            if(!stateChanged) TuioServer_->initFrame(time);
+            
             TuioServer_->removeTuioCursor(leftCursor_);
             leftCursor_ = NULL;
             stateChanged = TRUE;
@@ -80,6 +80,8 @@ void TUIOSkeletonTracker::update(XnVector3D* joints, XnConfidence* conf)
         // check to make sure cursor is in list before removing
         if (rightCursor_ != NULL)
         {
+            if(!stateChanged) TuioServer_->initFrame(time);
+
             TuioServer_->removeTuioCursor(rightCursor_);
             rightCursor_ = NULL;
             stateChanged = TRUE;
@@ -92,6 +94,8 @@ void TUIOSkeletonTracker::update(XnVector3D* joints, XnConfidence* conf)
         // cursor doesnt exist yet, add it
         if(leftCursor_ == NULL)
         {
+            if(!stateChanged) TuioServer_->initFrame(time);
+
             leftCursor_ = TuioServer_->addTuioCursor(NORMALIZEX(joints[1].X), NORMALIZEY(joints[1].Y));
             stateChanged = TRUE;
         }
@@ -99,6 +103,8 @@ void TUIOSkeletonTracker::update(XnVector3D* joints, XnConfidence* conf)
         // update existing cursor
         else
         {
+            if(!stateChanged) TuioServer_->initFrame(time);
+
             TuioServer_->updateTuioCursor(leftCursor_, NORMALIZEX(joints[1].X), NORMALIZEY(joints[1].Y));
             //printf("updated left cursor at %f,%f\n",NORMALIZEX(joints[1].X), NORMALIZEY(joints[1].Y));
             stateChanged = TRUE;
@@ -110,6 +116,8 @@ void TUIOSkeletonTracker::update(XnVector3D* joints, XnConfidence* conf)
         // cursor doesnt exist yet, add it
         if(rightCursor_ == NULL)
         {
+            if(!stateChanged) TuioServer_->initFrame(time);
+            
             rightCursor_ = TuioServer_->addTuioCursor(NORMALIZEX(joints[3].X), NORMALIZEY(joints[3].Y));
             stateChanged = TRUE;
 
@@ -118,17 +126,19 @@ void TUIOSkeletonTracker::update(XnVector3D* joints, XnConfidence* conf)
         // update existing cursor
         else
         {
+            if(!stateChanged) TuioServer_->initFrame(time);
+            
             TuioServer_->updateTuioCursor(rightCursor_, NORMALIZEX(joints[3].X), NORMALIZEY(joints[3].Y));
-            printf("updated right cursor at %f,%f\n",NORMALIZEX(joints[3].X), NORMALIZEY(joints[3].Y));
+            //printf("updated right cursor at %f,%f\n",NORMALIZEX(joints[3].X), NORMALIZEY(joints[3].Y));
             stateChanged = TRUE;
 
         }
     }
     
+    
     // Commit Tuio changes
     if(stateChanged)
     {
-        //TuioServer_->initFrame(time);
         TuioServer_->commitFrame();    
     }
     
