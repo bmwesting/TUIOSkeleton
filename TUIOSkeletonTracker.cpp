@@ -25,8 +25,7 @@ TUIOSkeletonTracker::TUIOSkeletonTracker()
     port_ = 3333;
     targetIP_ = "127.0.0.1";
     
-    TuioServer_ = new TUIO::TuioServer(targetIP_.c_str(), port_);
-    TUIO::TuioTime::initSession();
+    
     
     leftCursor_ = NULL;
     rightCursor_ = NULL;
@@ -37,16 +36,27 @@ TUIOSkeletonTracker::TUIOSkeletonTracker()
     threshold_ = 200;
     
     confidenceTracking_ = TRUE;
-    
-    if(!TuioServer_->isConnected())
-    {
-        printf("Tuio Server unable to connect.\n");
-    }
+     
 }
 
 TUIOSkeletonTracker::~TUIOSkeletonTracker()
 {
     //delete TuioServer_;
+}
+
+int TUIOSkeletonTracker::initialize()
+{
+
+    TuioServer_ = new TUIO::TuioServer(targetIP_.c_str(), port_);
+    TUIO::TuioTime::initSession();
+    
+    if(!TuioServer_->isConnected())
+    {
+        printf("Tuio Server unable to connect on IP: %s and UDP Port: %d.\n", targetIP_.c_str(), port_);
+        return -1;
+    }
+
+    return 0;
 }
 
 void TUIOSkeletonTracker::update(XnVector3D* joints, XnConfidence* conf)

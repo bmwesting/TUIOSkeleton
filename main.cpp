@@ -8,6 +8,8 @@
  * Author: Brandt Westing, TACC
  */
 
+#include <cstring>
+
 #include "define.h"
 #include "TUIOSkeletonTracker.h"
 
@@ -94,6 +96,87 @@ void XN_CALLBACK_TYPE UserPose_PoseDetected(xn::PoseDetectionCapability& capabil
     g_userGenerator->GetSkeletonCap().RequestCalibration(nId, TRUE);
 }
 
+void printHelp()
+{
+    printf("Command line options: \n");
+    printf("--help:            Print this message.\n");
+    printf("--set-port:        Set TUIO UDP Port (default: 3333)\n");
+    printf("--set-target-ip:   Set TUIO target IP (default: 127.0.0.1)\n");
+    printf("--no-confidence:   Set Confidence Tracking off.\n");
+    printf("--no-graphics:     Command line only.\n");
+    printf("--set-smoothing:   Set smoothing value (default: 0.1)\n");
+    
+}
+
+int parseArgs(int nArgs, char** args, TUIOSkeletonTracker* tracker)
+{
+    for(int i = 1; i < nArgs; i++)
+    {
+    
+        if (std::string(args[i]) == "--help" || std::string(args[i]) == "-h")
+        {
+            printHelp();
+            return -1;
+        }
+        else if (std::string(args[i]) == "--set-port" || std::string(args[i]) == "-p")
+        {
+        
+            if( i + 1 > nArgs - 1)
+            {
+                printf("%s: invalid parameter.\n", std::string(args[i]).c_str());
+                return -1;
+            }
+            
+            int port = atoi(args[i+1]);
+            
+            if (port <= 0)
+            {
+                printf("UDP Port: %d is not a valid port.\n", port);
+                return -1;
+            }
+            else
+            {
+                tracker->setPort(port);
+                i++;
+            }
+        }
+        else if (std::string(args[i]) == "--set-target-ip" || std::string(args[i]) == "-i")
+        {
+            if( i + 1 > nArgs - 1)
+            {
+                printf("%s: invalid parameter.\n", std::string(args[i]).c_str());
+                return -1;
+            }
+            
+            const std::string IP(args[i+1]);
+            tracker->setTargetIP(IP);
+            i++;
+        }
+        else if (std::string(args[i]) == "--no-confidence" || std::string(args[i]) == "-nc")
+        {
+            tracker->setConfidenceTrackingOff();
+        }
+        else if (std::string(args[i]) == "--no-graphics" || std::string(args[i]) == "-ng")
+        {
+        }
+        else if (std::string(args[i]) == "--set-smoothing" || std::string(args[i]) == "-s")
+        {
+        
+            if( i + 1 > nArgs - 1)
+            {
+                printf("%s: invalid parameter.\n", std::string(args[i]).c_str());
+                return -1;
+            }
+            
+            g_smoothing = atof(args[i+1]);
+        }
+    
+    }
+    
+    return 0;
+
+}
+
 
 int initializeOpenNI()
 {
@@ -139,8 +222,29 @@ int initializeOpenNI()
 
 int main(int argc, char** argv)
 {
-    initializeOpenNI();
     
+    TUIOSkeletonTracker* tracker = new TUIOSkeletonTracker();
+
+    if (parseArgs(argc, argv, tracker) == -1)
+    {
+        //g_context->Shutdown();
+        return -1;
+    }
+    
+    // Sets up the TUIOServer on specified port and IP
+    if(tracker->initialize() == -1)
+    {
+        delete tracker;
+        //g_context->Shutdown();
+        return -1;
+    }
+    
+    if (initializeOpenNI() == -1)
+    {
+        g_context->Shutdown();
+        return -1;
+    }
+        
     XnStatus rc = XN_STATUS_OK;
     xn::DepthMetaData depthMD;
     g_depthGenerator->GetMetaData(depthMD);
@@ -172,10 +276,10 @@ int main(int argc, char** argv)
     }
     
     g_userGenerator->GetSkeletonCap().SetSkeletonProfile(XN_SKEL_PROFILE_ALL);
+    g_userGenerator->GetSkeletonCap().SetSmoothing(g_smoothing);
     
-    TUIOSkeletonTracker* tracker = new TUIOSkeletonTracker();
     tracker->setResolutionLimits(depthMD.XRes(), depthMD.YRes());
-    //printf("full res: %d,%d\n", depthMD.FullXRes(), depthMD.FullYRes());
+    
     g_context->StartGeneratingAll();
         
     while(1)

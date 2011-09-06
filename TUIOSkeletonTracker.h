@@ -37,6 +37,12 @@ class TUIOSkeletonTracker
         void update(XnVector3D* joints, XnConfidence* confidence);
         void setResolutionLimits(int x, int y);
         
+        void setTargetIP(const std::string& ip) { targetIP_ = ip; }
+        void setPort(unsigned int port) { port_ = port; }
+        void setConfidenceTrackingOff() { confidenceTracking_ = FALSE; }
+        
+        int initialize();
+        
     private:
     
         unsigned int port_;

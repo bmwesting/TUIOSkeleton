@@ -18,6 +18,8 @@ XnBool g_bNeedPose = FALSE;
 XnChar g_strPose[20] = "";
 XnUserID g_trackedUser = NULL;
 
+float g_smoothing = 0.1;
+
 typedef enum
 {
     IN_SESSION,
