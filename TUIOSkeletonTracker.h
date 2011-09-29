@@ -40,6 +40,7 @@ class TUIOSkeletonTracker
         void setTargetIP(const std::string& ip) { targetIP_ = ip; }
         void setPort(unsigned int port) { port_ = port; }
         void setConfidenceTrackingOff() { confidenceTracking_ = FALSE; }
+        void setThreshold(const int t)  { threshold_ = t; }
         
         int initialize();
         

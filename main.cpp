@@ -105,7 +105,8 @@ void printHelp()
     printf("--no-confidence:   Set Confidence Tracking off.\n");
     printf("--no-graphics:     Command line only.\n");
     printf("--set-smoothing:   Set smoothing value (default: 0.1)\n");
-    
+    printf("--set-threshold:   Set threshold value (default: 200)\n");
+
 }
 
 int parseArgs(int nArgs, char** args, TUIOSkeletonTracker* tracker)
@@ -169,6 +170,15 @@ int parseArgs(int nArgs, char** args, TUIOSkeletonTracker* tracker)
             }
             
             g_smoothing = atof(args[i+1]);
+        }
+        else if (std::string(args[i]) == "--set-threshold" || std::string(args[i]) == "-t")
+        {
+            if( i + 1 > nArgs - 1)
+            {
+                printf("%s: invalid parameter.\n", std::string(args[i]).c_str());
+                return -1;
+            }
+            tracker->setThreshold(atoi(args[i+1]));
         }
     
     }
