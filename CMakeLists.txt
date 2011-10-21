@@ -27,6 +27,7 @@ set(SRCS
     SensorDevice.cpp
     TouchServer.cpp
     callbacks.cpp
+    SkeletonMath.cpp
 )
 
 add_executable(TUIOSkeleton ${SRCS})

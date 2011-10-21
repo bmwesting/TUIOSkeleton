@@ -1,5 +1,6 @@
 #include "SensorDevice.h"
 #include "callbacks.h"
+#include "SkeletonMath.h"
 
 #include <string>
 

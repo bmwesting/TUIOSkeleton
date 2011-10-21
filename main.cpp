@@ -27,8 +27,9 @@ void printHelp()
     printf("--no-graphics:      Command line only (current default).\n");
     printf("--set-smoothing:    Set smoothing value (default: 0.1)\n");
     printf("--set-threshold:    Set threshold value (default: 200)\n");
-    printf("--save-calibration: Save the calibrated skeleton after calibration.");
-    printf("--load-calibration: Load a calibration file when user detected.");
+    printf("--save-calibration: Save the calibrated skeleton after calibration\n");
+    printf("--load-calibration: Load a calibration file when user detected\n");
+    printf("--mode-vector:      Project cursors using head->hand vector\n");
 }
 
 int parseArgs(int nArgs, char** args, SkeletonTracker* tracker)
@@ -126,6 +127,10 @@ int parseArgs(int nArgs, char** args, SkeletonTracker* tracker)
             std::string filename = std::string(args[i+1]);
             tracker->loadCalibrationData(filename);
             i++;
+        }
+        else if (std::string(args[i]) == "--mode-vector")
+        {
+            tracker->setModeToVector();
         }
     }
     

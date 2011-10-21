@@ -1,5 +1,6 @@
 #include "SkeletonTracker.h"
 #include "SensorDevice.h"
+#include "SkeletonMath.h"
 
 // normalize the joint coordinates to 0.0 - 1.0 for TUIO
 inline float NORMALIZEX(const float x) { return x/640.0; }
@@ -29,6 +30,9 @@ int SkeletonTracker::initialize(const std::string& ip, const unsigned int port)
         sensor_ = NULL;
         return -1;
     }
+    
+    if (mode_ == VECTORMODE)
+        sensor_->setPointModeToReal();
     
     touchServer_ = new TouchServer(ip.c_str(), port);
     

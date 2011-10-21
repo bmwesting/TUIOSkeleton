@@ -42,7 +42,7 @@ class SkeletonTracker
         
         // Threshold determines whether events are sent through TUIO
         inline void setThreshold(const unsigned int threshold) { threshold_ = threshold; }
-        inline unsigned int getthreshold() { return threshold_; }
+        inline unsigned int getThreshold() { return threshold_; }
         
         SensorDevice* getSensorDevice(){ return sensor_; }
     

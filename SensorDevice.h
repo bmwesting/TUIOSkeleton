@@ -7,10 +7,7 @@
 #include <XnCppWrapper.h>
 #include <string>
 
-struct Point
-{
-    float x_,y_,z_,confidence_;
-};
+#include "SkeletonMath.h"
 
 class SensorDevice
 {
@@ -45,6 +42,9 @@ class SensorDevice
         
         // returns unordered_map of points with keys of type <string>
         void getAllAvailablePoints(){}
+        
+        void setPointModeToProjective() { pointModeProjective_ = true; }
+        void setPointModeToReal() { pointModeProjective_ = false; }
         
         // set the smoothing factor
         inline void setSmoothing(const float smoothingF)
