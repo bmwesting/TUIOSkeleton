@@ -4,8 +4,8 @@ cmake_minimum_required(VERSION 2.8.0)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-cpp")
 
-# enable debugging, and show all warnings
-set(CMAKE_CXX_FLAGS "-g -Wall")
+# enable debugging, remove Mac deprecation warnings
+set(CMAKE_CXX_FLAGS "-g -Wno-unknown-pragmas -Wno-deprecated -Wno-deprecated-declarations")
 
 # TUIO Library Directories
 add_subdirectory(TUIO)
@@ -23,7 +23,10 @@ set(LIBS ${LIBS} OpenNI)
 
 set(SRCS
     main.cpp
-    TUIOSkeletonTracker.cpp
+    SkeletonTracker.cpp
+    SensorDevice.cpp
+    TouchServer.cpp
+    callbacks.cpp
 )
 
 add_executable(TUIOSkeleton ${SRCS})
