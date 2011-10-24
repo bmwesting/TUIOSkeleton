@@ -26,6 +26,13 @@ SkeletonVector::SkeletonVector(const Point& p)
 
 }
 
+SkeletonVector::SkeletonVector(const float x, const float y, const float z)
+{
+    point_.x_ = x;
+    point_.y_ = y;
+    point_.z_ = z;
+}
+
 
 SkeletonVector::~SkeletonVector()
 {
@@ -91,6 +98,13 @@ const SkeletonVector SkeletonVector::operator*(const SkeletonVector& rhs) const
 {
     SkeletonVector result = *this;
     result *= rhs;
+    return result;
+}
+
+const SkeletonVector SkeletonVector::operator*(const float f) const
+{
+    SkeletonVector result = *this;
+    result.setPoint(result.getPoint().x_ * f, result.getPoint().y_ * f, result.getPoint().z_ * f);
     return result;
 }
 

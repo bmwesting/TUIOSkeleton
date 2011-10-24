@@ -15,7 +15,11 @@ SkeletonTracker::SkeletonTracker()
                               threshold_(250),
                               saveCalibration_(FALSE),
                               loadCalibration_(FALSE),
-                              calibrationFile_("TUIOSkeleton-UserCalibrationData.bin")
+                              calibrationFile_("TUIOSkeleton-UserCalibrationData.bin"),
+                              vectorCalibrationTop_(TRUE),
+                              vectorCalibrationBot_(TRUE),
+                              msgCalibrationTop_(FALSE),
+                              msgCalibrationBot_(FALSE)
 {
 }
 
@@ -152,5 +156,76 @@ void SkeletonTracker::updateHands()
 
 void SkeletonTracker::updateVectors()
 {
-
+    Point joints[3];
+    sensor_->getHandPoints(joints);
+    sensor_->getHeadPoint(joints+2);
+    
+    
+    
+    bool confidenceLeft = true;
+    bool confidenceRight = true;
+    
+    // if we are tracking confidence, reject joints that are not confident
+    if (confidenceTracking_)
+    {
+        if (joints[0].confidence_ <= 0.5)
+            confidenceLeft = false;
+        if (joints[1].confidence_ <= 0.5)
+            confidenceRight = false;
+        if (joints[3].confidence_ <= 0.5)
+            confidenceLeft = confidenceRight = false;
+    }
+    
+    O_ks_ = SkeletonVector(-670, 820, 0);
+    screenBBoxBottom_ = SkeletonVector(515, 195, 0);
+    
+    // have we calibrated yet?
+    if(!vectorCalibrationTop_)
+    {
+        // check to see if we are in calibration pose for top
+        
+        //first time, print message
+        if(!msgCalibrationTop_)
+        {
+            printf("Calibrate top left!\n");
+            msgCalibrationTop_ = true;
+        }
+        //calibrateTop();
+        return;
+    }
+    else if(!vectorCalibrationBot_)
+    {
+        // check for calibration pose for bottom
+        
+        //first time, print message
+        if(!msgCalibrationBot_)
+        {
+            printf("Calibrate bottom right!\n");
+            msgCalibrationBot_ = true;
+        }
+        //calibrateBot();
+        return;
+    }
+    
+    if (!confidenceLeft)
+    {
+        SkeletonVector p1_l, p2_l, p3_l, t0_l;
+        p1_l = joints[2];
+        p2_l = joints[0];
+        
+        t0_l = p2_l - p1_l;
+        
+        float scaleC_l = -(p1_l.getPoint().z_)/(t0_l.getPoint().z_);
+        p3_l = p1_l + t0_l * scaleC_l;
+        
+        p3_l.print();
+        
+        float cursorX, cursorY;
+        
+        cursorX = (p3_l.getPoint().x_ - O_ks_.getPoint().x_)/(screenBBoxBottom_.getPoint().x_ - O_ks_.getPoint().x_);
+        cursorY = -(p3_l.getPoint().y_ - O_ks_.getPoint().y_)/(O_ks_.getPoint().y_ - screenBBoxBottom_.getPoint().y_);
+        
+        printf("CursorX: %f, CursorY: %f\n", cursorX, cursorY);
+    }
+    
 }
