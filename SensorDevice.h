@@ -49,7 +49,7 @@ class SensorDevice
         // set the smoothing factor
         inline void setSmoothing(const float smoothingF)
         {
-            userG_.GetSkeletonCap().SetSmoothing(smoothingF);
+            smoothingFactor_ = smoothingF;
         }
         
         int lookForCalibrationPoseOn();
@@ -93,6 +93,8 @@ class SensorDevice
         bool loadCalibration_;
         bool saveCalibration_;
         std::string calibrationFilename_;
+        
+        float smoothingFactor_;
         
 };
 

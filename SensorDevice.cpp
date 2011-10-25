@@ -22,7 +22,8 @@ SensorDevice::SensorDevice() :  context_(),
                                 pose_("Psi"),
                                 loadCalibration_(FALSE),
                                 saveCalibration_(FALSE),
-                                calibrationFilename_("TUIOSkeleton-UserCalibrationData.bin")
+                                calibrationFilename_("TUIOSkeleton-UserCalibrationData.bin"),
+                                smoothingFactor_(0.8)
 {}
 
 SensorDevice::~SensorDevice()
@@ -63,6 +64,7 @@ int SensorDevice::initialize()
     
     // make sure the user points are reported from the POV of the depth generator
     userG_.GetAlternativeViewPointCap().SetViewPoint(depthG_);
+    userG_.GetSkeletonCap().SetSmoothing(smoothingFactor_);
     
     return 0;
 }
