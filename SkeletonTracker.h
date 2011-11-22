@@ -62,7 +62,7 @@ class SkeletonTracker
         std::string calibrationFile_;
         
         //related to vector projection
-        bool vectorCalibrationTop_, vectorCalibrationBot_, msgCalibrationTop_, msgCalibrationBot_;
+        bool vectorCalibrationTop_, vectorCalibrationBot_;
         SkeletonVector O_ks_, screenBBoxBottom_; // sensor to top-left screen vector
 };
 

@@ -116,6 +116,7 @@ int parseArgs(int nArgs, char** args, SkeletonTracker* tracker)
                 }
             std::string filename = std::string(args[i+1]);
             tracker->saveCalibrationData(filename);
+            i++;
         }
         else if (std::string(args[i]) == "--load-calibration")
         {
@@ -131,6 +132,12 @@ int parseArgs(int nArgs, char** args, SkeletonTracker* tracker)
         else if (std::string(args[i]) == "--mode-vector")
         {
             tracker->setModeToVector();
+        }
+        
+        else
+        {
+            printf("'%s', not a valid argument.\n", args[i]);
+            printHelp();
         }
     }
     

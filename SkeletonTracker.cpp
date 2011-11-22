@@ -2,7 +2,9 @@
 #include "SensorDevice.h"
 #include "SkeletonMath.h"
 
-// normalize the joint coordinates to 0.0 - 1.0 for TUIO
+#include <math.h>
+
+// normalize the joint coordinates to 0.0 - 1.0 for TUIO, assuming camera set to VGA
 inline float NORMALIZEX(const float x) { return x/640.0; }
 inline float NORMALIZEY(const float y) { return y/480.0; }
 
@@ -12,14 +14,12 @@ SkeletonTracker::SkeletonTracker()
                               trackedUser_(-1),
                               mode_(HANDMODE),
                               confidenceTracking_(TRUE),
-                              threshold_(250),
+                              threshold_(400),
                               saveCalibration_(FALSE),
                               loadCalibration_(FALSE),
-                              calibrationFile_("TUIOSkeleton-UserCalibrationData.bin"),
+                              calibrationFile_("usercal.skel"),
                               vectorCalibrationTop_(TRUE),
-                              vectorCalibrationBot_(TRUE),
-                              msgCalibrationTop_(FALSE),
-                              msgCalibrationBot_(FALSE)
+                              vectorCalibrationBot_(TRUE)
 {
 }
 
@@ -96,15 +96,26 @@ void SkeletonTracker::update()
 // if we are doing hand tracking, update the positions and cursors
 void SkeletonTracker::updateHands()
 {
-    Point joints[4];
-    sensor_->getHandPoints(joints);
-    sensor_->getShoulderPoints(joints+2);
+    Point jointsReal[4];
+    sensor_->setPointModeToReal();
+    sensor_->getHandPoints(jointsReal);
+    sensor_->getShoulderPoints(jointsReal+2);
     
-    // calculate distances
+    // calculate euclidean distances between hand and shoulder points
+    // distanceLeft = sqrt((left_hand_x - shoulder_x)^2 + ... )
     int distanceLeft, distanceRight;
-    distanceLeft  = joints[2].z_ - joints[0].z_;
-    distanceRight = joints[3].z_ - joints[1].z_;
-    
+    distanceLeft =  sqrt(pow((jointsReal[2].x_ - jointsReal[0].x_), 2) +
+                         pow((jointsReal[2].y_ - jointsReal[0].y_), 2) +
+                         pow((jointsReal[2].z_ - jointsReal[0].z_), 2));
+    distanceRight = sqrt(pow((jointsReal[3].x_ - jointsReal[1].x_), 2) +
+                         pow((jointsReal[3].y_ - jointsReal[1].y_), 2) +
+                         pow((jointsReal[3].z_ - jointsReal[1].z_), 2));
+                             
+    //get projective (pixel) coordinates for remaining processing
+    Point joints[4];
+    sensor_->setPointModeToProjective();
+    sensor_->getHandPoints(joints);
+    sensor_->getShoulderPoints(joints+2);    
     
     bool confidenceLeft = TRUE;
     bool confidenceRight = TRUE;
@@ -153,6 +164,7 @@ void SkeletonTracker::updateHands()
 void SkeletonTracker::updateVectors()
 {
     Point joints[3];
+    sensor_->setPointModeToReal();
     sensor_->getHandPoints(joints);
     sensor_->getHeadPoint(joints+2);
         
@@ -170,12 +182,18 @@ void SkeletonTracker::updateVectors()
             confidenceLeft = confidenceRight = false;
     }
     
-    float distanceLeft, distanceRight;
-    distanceLeft = joints[2].z_ - joints[0].z_;
-    distanceRight = joints[2].z_ - joints[1].z_;
+    // calculate euclidean distances between hand and head points
+    // distanceLeft = sqrt((left_hand_x - head_x)^2 + ... )
+    int distanceLeft, distanceRight;
+    distanceLeft =  sqrt(pow((joints[2].x_ - joints[0].x_), 2) +
+                         pow((joints[2].y_ - joints[0].y_), 2) +
+                         pow((joints[2].z_ - joints[0].z_), 2));
+    distanceRight = sqrt(pow((joints[2].x_ - joints[1].x_), 2) +
+                         pow((joints[2].y_ - joints[1].y_), 2) +
+                         pow((joints[2].z_ - joints[1].z_), 2));
     
-    O_ks_ = SkeletonVector(-1000, 1850, 0);
-    screenBBoxBottom_ = SkeletonVector(1100, 450, 0);
+    O_ks_ = SkeletonVector(-3100, 2650, 0);
+    screenBBoxBottom_ = SkeletonVector(2000, 0, 0);
     
     /* 
      * We are not doing auto-calibration just yet:: future!
@@ -240,7 +258,7 @@ void SkeletonTracker::updateVectors()
         // p3 is projected point on display
         p3_l = p1_l + t0_l * scaleC_l;
         
-        //p3_l.print();
+        p3_l.print();
         
         // The TUIO cursors based on the projected vector, will be normalized 0.0 - 1.0
         float cursorX_l, cursorY_l;
@@ -262,6 +280,7 @@ void SkeletonTracker::updateVectors()
         else
             touchServer_->updateLeftCursor(cursorX_l, cursorY_l);        
     }
+    
     if (confidenceRight && distanceRight >= threshold_)
     {
         
@@ -275,7 +294,7 @@ void SkeletonTracker::updateVectors()
         float scaleC_r = -(p1_r.getPoint().z_)/(t0_r.getPoint().z_);
         
         // p3 is projected point on display
-        p3_r = p1_r + t0_r * scaleC_r;
+        //p3_r = p1_r + t0_r * scaleC_r;
         
                 
         // The TUIO cursors based on the projected vector, will be normalized 0.0 - 1.0
@@ -296,5 +315,4 @@ void SkeletonTracker::updateVectors()
     
     touchServer_->commitFrame();    
 
-    
 }
