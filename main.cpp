@@ -25,8 +25,8 @@ void printHelp()
     printf("--set-target-ip:    Set TUIO target IP (default: 127.0.0.1)\n");
     printf("--no-confidence:    Set Confidence Tracking off.\n");
     printf("--no-graphics:      Command line only (current default).\n");
-    printf("--set-smoothing:    Set smoothing value (default: 0.1)\n");
-    printf("--set-threshold:    Set threshold value (default: 200)\n");
+    printf("--set-smoothing:    Set smoothing value (default: 0.8)\n");
+    printf("--set-threshold:    Set threshold value (default: 400)\n");
     printf("--save-calibration: Save the calibrated skeleton after calibration\n");
     printf("--load-calibration: Load a calibration file when user detected\n");
     printf("--mode-vector:      Project cursors using head->hand vector\n");
