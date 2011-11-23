@@ -7,10 +7,18 @@
 
 #include <TuioServer.h>
 
+#include <map>
+
 namespace TUIO
 {
     class TuioCursor;
 }
+
+struct CursorPair
+{
+    TUIO::TuioCursor* leftCursor_;
+    TUIO::TuioCursor* rightCursor_;
+};
 
 class TouchServer : public TUIO::TuioServer
 {
@@ -20,10 +28,10 @@ class TouchServer : public TUIO::TuioServer
         
         inline void initFrame();
         
-        void updateLeftCursor(const float xp, const float yp);
-        void updateRightCursor(const float xp, const float yp);
-        void removeLeftCursor();
-        void removeRightCursor();
+        void updateLeftCursor(const unsigned int user, const float xp, const float yp);
+        void updateRightCursor(const unsigned int user, const float xp, const float yp);
+        void removeLeftCursor(const unsigned int user);
+        void removeRightCursor(const unsigned int user);
         
         // overidden methods
         void removeTuioCursor(TUIO::TuioCursor *tcur);
@@ -32,8 +40,7 @@ class TouchServer : public TUIO::TuioServer
         void commitFrame();
         
     private:
-        TUIO::TuioCursor* leftCursor_;
-        TUIO::TuioCursor* rightCursor_;
+        std::map<unsigned int, CursorPair> cursorMap_;
         
         bool stateChanged_;
 };

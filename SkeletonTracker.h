@@ -53,7 +53,6 @@ class SkeletonTracker
         SensorDevice* sensor_;
         TouchServer* touchServer_;
         
-        int trackedUser_;
         unsigned int mode_;
         unsigned int threshold_;
         bool confidenceTracking_;

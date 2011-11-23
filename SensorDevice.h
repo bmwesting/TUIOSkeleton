@@ -6,6 +6,7 @@
 
 #include <XnCppWrapper.h>
 #include <string>
+#include <vector>
 
 #include "SkeletonMath.h"
 
@@ -19,26 +20,29 @@ class SensorDevice
         
         inline void waitForDeviceUpdateOnUser() { context_.WaitOneUpdateAll(depthG_); }
         
-        // returns TRUE if the device is currently tracking a user
+        /*
+         * Updates list of currently tracked users
+         * Returns TRUE if there is a user who's skeleton is being tracked
+         */
         bool isTracking();
         
         // stores the latest hand points in hands(preallocated):
         // hands[0] = left, hands[1] = right
-        void getHandPoints(Point* const hands);
+        void getHandPoints(const unsigned int i, Point* const hands);
         
         // stores the latest elbow points in elbows
         // same convention as getHandPoints()
-        void getElbowPoints(Point* const elbows);
+        void getElbowPoints(const unsigned int i, Point* const elbows);
         
         // stores the lastest arm points : hand, elbow, shoulder
         // 0 = l hand, 1 = r hand, 2 = left elbow....
-        void getArmPoints(Point* const arms);
+        void getArmPoints(const unsigned int i, Point* const arms);
         
         // stores head points in externally managed array
-        void getHeadPoint(Point* const head);
+        void getHeadPoint(const unsigned int i, Point* const head);
         
         // gets shoulder points
-        void getShoulderPoints(Point* const shoulders);
+        void getShoulderPoints(const unsigned int i, Point* const shoulders);
         
         // returns unordered_map of points with keys of type <string>
         void getAllAvailablePoints(){}
@@ -61,7 +65,10 @@ class SensorDevice
         
         xn::UserGenerator* getUserGenerator() { return &userG_; }
         
-        void setTrackedUser(const int uID) { trackedUser_ = uID; }
+        unsigned int getNOTrackedUsers() { return trackedUsers_.size(); }
+        unsigned int getUID(int i) { return trackedUsers_[i]; }
+        void addTrackedUser(const int uID) { trackedUsers_.push_back(uID); }
+        void removeTrackedUser(const int uID);
         
         void printAvailablePoses();
         
@@ -88,7 +95,7 @@ class SensorDevice
         bool needCalibrationPose_;
         std::string pose_;
         
-        int trackedUser_;
+        std::vector<int> trackedUsers_;
         
         bool loadCalibration_;
         bool saveCalibration_;

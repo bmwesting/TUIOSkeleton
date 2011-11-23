@@ -18,7 +18,7 @@ SensorDevice::SensorDevice() :  context_(),
                                 userG_(),
                                 pointModeProjective_(TRUE),
                                 needCalibrationPose_(TRUE),
-                                trackedUser_(-1),
+                                trackedUsers_(),
                                 pose_("Psi"),
                                 loadCalibration_(FALSE),
                                 saveCalibration_(FALSE),
@@ -87,54 +87,55 @@ void SensorDevice::convertXnJointToPoint(XnSkeletonJointPosition* const joints, 
     }
 }
         
-void SensorDevice::getHandPoints(Point* const hands)
+void SensorDevice::getHandPoints(const unsigned int i, Point* const hands)
 {
     XnSkeletonJointPosition joints[2];
-    userG_.GetSkeletonCap().GetSkeletonJointPosition(trackedUser_, XN_SKEL_LEFT_HAND, joints[0]);
-    userG_.GetSkeletonCap().GetSkeletonJointPosition(trackedUser_, XN_SKEL_RIGHT_HAND, joints[1]);
+    userG_.GetSkeletonCap().GetSkeletonJointPosition(trackedUsers_[i], XN_SKEL_LEFT_HAND, joints[0]);
+    userG_.GetSkeletonCap().GetSkeletonJointPosition(trackedUsers_[i], XN_SKEL_RIGHT_HAND, joints[1]);
     
     convertXnJointToPoint(joints, hands, 2);
 }
 
-void SensorDevice::getElbowPoints(Point* const elbows)
+void SensorDevice::getElbowPoints(const unsigned int i, Point* const elbows)
 {
     XnSkeletonJointPosition joints[2];
-    userG_.GetSkeletonCap().GetSkeletonJointPosition(trackedUser_, XN_SKEL_LEFT_ELBOW, joints[0]);
-    userG_.GetSkeletonCap().GetSkeletonJointPosition(trackedUser_, XN_SKEL_RIGHT_ELBOW, joints[1]);
+    userG_.GetSkeletonCap().GetSkeletonJointPosition(trackedUsers_[i], XN_SKEL_LEFT_ELBOW, joints[0]);
+    userG_.GetSkeletonCap().GetSkeletonJointPosition(trackedUsers_[i], XN_SKEL_RIGHT_ELBOW, joints[1]);
     convertXnJointToPoint(joints, elbows, 2);
 
 }
 
-void SensorDevice::getArmPoints(Point* const arms)
+void SensorDevice::getArmPoints(const unsigned int i, Point* const arms)
 {
-    getHandPoints(arms);
-    getElbowPoints(arms+2);
+    getHandPoints(i, arms);
+    getElbowPoints(i, arms+2);
     
     XnSkeletonJointPosition joints[2];
-    userG_.GetSkeletonCap().GetSkeletonJointPosition(trackedUser_, XN_SKEL_LEFT_ELBOW, joints[4]);
-    userG_.GetSkeletonCap().GetSkeletonJointPosition(trackedUser_, XN_SKEL_RIGHT_ELBOW, joints[5]);
+    userG_.GetSkeletonCap().GetSkeletonJointPosition(trackedUsers_[i], XN_SKEL_LEFT_ELBOW, joints[4]);
+    userG_.GetSkeletonCap().GetSkeletonJointPosition(trackedUsers_[i], XN_SKEL_RIGHT_ELBOW, joints[5]);
     convertXnJointToPoint(joints, arms, 2);
 }
 
-void SensorDevice::getShoulderPoints(Point* const shoulders)
+void SensorDevice::getShoulderPoints(const unsigned int i, Point* const shoulders)
 {
     XnSkeletonJointPosition joints[2];
-    userG_.GetSkeletonCap().GetSkeletonJointPosition(trackedUser_, XN_SKEL_LEFT_SHOULDER, joints[0]);
-    userG_.GetSkeletonCap().GetSkeletonJointPosition(trackedUser_, XN_SKEL_RIGHT_SHOULDER, joints[1]);
+    userG_.GetSkeletonCap().GetSkeletonJointPosition(trackedUsers_[i], XN_SKEL_LEFT_SHOULDER, joints[0]);
+    userG_.GetSkeletonCap().GetSkeletonJointPosition(trackedUsers_[i], XN_SKEL_RIGHT_SHOULDER, joints[1]);
     convertXnJointToPoint(joints, shoulders, 2);
 }
 
-void SensorDevice::getHeadPoint(Point* const head)
+void SensorDevice::getHeadPoint(const unsigned int i, Point* const head)
 {
     XnSkeletonJointPosition joints;
-    userG_.GetSkeletonCap().GetSkeletonJointPosition(trackedUser_, XN_SKEL_HEAD, joints);
+    userG_.GetSkeletonCap().GetSkeletonJointPosition(trackedUsers_[i], XN_SKEL_HEAD, joints);
     convertXnJointToPoint(&joints, head, 1);
 }
 
 bool SensorDevice::isTracking()
 {
-    XnUserID users[20];
+    XnUserID users[64];
     XnUInt16 nUsers = userG_.GetNumberOfUsers();
+    trackedUsers_.clear();
     
     userG_.GetUsers(users, nUsers);
         
@@ -142,13 +143,15 @@ bool SensorDevice::isTracking()
     {
         if(userG_.GetSkeletonCap().IsTracking(users[i]))
         {
-            trackedUser_ = users[i];
-            return TRUE;
+            trackedUsers_.push_back(users[i]);
         }
     }
     
-    trackedUser_ = -1;
-    return FALSE;
+    if (!trackedUsers_.empty())
+        return TRUE;
+    else
+        return FALSE;
+    
 }
 
 // set device to look for calibration pose and supply callback functions for user events

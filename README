@@ -1,6 +1,6 @@
 TUIOSkeleton - A TUIO server for OpenNI devices.
 
-This TUIO server implementation is intended to send TUIO messages to a client with the users hands active as cursors. It is specialized to for large display systems in that hand positions are not necessary scaled and sent directly as TUIO cursors, but can form vectors that extend beyond the field of view of the camera sensor.
+This TUIO server implementation is intended to send TUIO messages to a client with the users hands active as cursors. It is specialized for large display systems in that hand positions are not necessary scaled and sent directly as TUIO cursors, but can form vectors that extend beyond the field of view of the camera sensor.
 
 This implementation supports auto-calibration of users, and the number of tracked users is limited only by the hardware used (4 for Kinect). For advanced usage, please see the options.
 

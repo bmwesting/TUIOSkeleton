@@ -15,7 +15,6 @@ void XN_CALLBACK_TYPE UserCalibration_CalibrationComplete(xn::SkeletonCapability
         // Calibration succeeded
         printf("Calibration complete, start tracking user %d\n", nId);
         sensor->getUserGenerator()->GetSkeletonCap().StartTracking(nId);
-        sensor->setTrackedUser(nId);
         
         //are we saving calibration data
         if(sensor->getSaveCalibration())
@@ -64,7 +63,6 @@ void XN_CALLBACK_TYPE User_NewUser(xn::UserGenerator& generator, XnUserID nId, v
 			// Make sure state is coherent
 			sensor->getUserGenerator()->GetPoseDetectionCap().StopPoseDetection(nId);
 			sensor->getUserGenerator()->GetSkeletonCap().StartTracking(nId);
-			sensor->setTrackedUser(nId);
 		}
     }
 }
