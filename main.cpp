@@ -25,8 +25,8 @@ void printHelp()
     printf("--set-target-ip:    Set TUIO target IP (default: 127.0.0.1)\n");
     printf("--no-confidence:    Set Confidence Tracking off.\n");
     printf("--no-graphics:      Command line only (current default).\n");
-    printf("--set-smoothing:    Set smoothing value (default: 0.1)\n");
-    printf("--set-threshold:    Set threshold value (default: 200)\n");
+    printf("--set-smoothing:    Set smoothing value (default: 0.8)\n");
+    printf("--set-threshold:    Set threshold value (default: 400)\n");
     printf("--save-calibration: Save the calibrated skeleton after calibration\n");
     printf("--load-calibration: Load a calibration file when user detected\n");
     printf("--mode-vector:      Project cursors using head->hand vector\n");
@@ -116,6 +116,7 @@ int parseArgs(int nArgs, char** args, SkeletonTracker* tracker)
                 }
             std::string filename = std::string(args[i+1]);
             tracker->saveCalibrationData(filename);
+            i++;
         }
         else if (std::string(args[i]) == "--load-calibration")
         {
@@ -131,6 +132,12 @@ int parseArgs(int nArgs, char** args, SkeletonTracker* tracker)
         else if (std::string(args[i]) == "--mode-vector")
         {
             tracker->setModeToVector();
+        }
+        
+        else
+        {
+            printf("'%s', not a valid argument.\n", args[i]);
+            printHelp();
         }
     }
     

@@ -5,8 +5,7 @@
 
 TouchServer::TouchServer(const char* ip, const unsigned int port) : 
                                   TuioServer(ip, port),
-                                  leftCursor_(NULL),
-                                  rightCursor_(NULL),
+                                  cursorMap_(),
                                   stateChanged_(false)
 {}
 
@@ -52,42 +51,72 @@ void TouchServer::commitFrame()
     }
 }
 
-void TouchServer::removeLeftCursor()
+void TouchServer::removeLeftCursor(const unsigned int user)
 {
-    //printf("Removing left cursor.\n");
-    if(leftCursor_ != NULL)
+    // this user does not currently have any cursors
+    if (cursorMap_.count(user) == 0)
+        return;
+    
+    // user is in map
+    // if the users' left cursor is not NULL, remove it and set NULL
+    if(cursorMap_[user].leftCursor_ != NULL)
     {
-        removeTuioCursor(leftCursor_);
-        leftCursor_ = NULL;
+        removeTuioCursor(cursorMap_[user].leftCursor_);
+        cursorMap_[user].leftCursor_ = NULL;
     }
 }
 
-void TouchServer::removeRightCursor()
+void TouchServer::removeRightCursor(const unsigned int user)
 {
-    //printf("Removing right cursor.\n");
-    if(rightCursor_ != NULL)
+    // this user does not currently have any cursors
+    if (cursorMap_.count(user) == 0)
+        return;
+    
+    // user is in map
+    // if the users' left cursor is not NULL, remove it and set NULL
+    if(cursorMap_[user].rightCursor_ != NULL)
     {
-        removeTuioCursor(rightCursor_);
-        rightCursor_ = NULL;
+        removeTuioCursor(cursorMap_[user].rightCursor_);
+        cursorMap_[user].rightCursor_ = NULL;
     }
 }
 
-void TouchServer::updateLeftCursor(const float xp, const float yp)
+void TouchServer::updateLeftCursor(const unsigned int user, const float xp, const float yp)
 {
     //printf("Left cursor at: %f, %f.\n", xp, yp);
     
-    if(leftCursor_ != NULL)
-        updateTuioCursor(leftCursor_, xp, yp);
+    // user not in map, add user and add cursor
+    if(cursorMap_.count(user) == 0)
+    {
+        CursorPair cpair;
+        cpair.leftCursor_ = addTuioCursor(xp, yp);
+        cpair.rightCursor_ = NULL;
+        cursorMap_.insert(std::pair<unsigned int, CursorPair>(user, cpair));
+    }
+    
+    // user is in map, update cursor
+    if(cursorMap_[user].leftCursor_ != NULL)
+        updateTuioCursor(cursorMap_[user].leftCursor_, xp, yp);
     else
-        leftCursor_ = addTuioCursor(xp, yp);  
+        cursorMap_[user].leftCursor_ = addTuioCursor(xp, yp);  
 }
 
-void TouchServer::updateRightCursor(const float xp, const float yp)
+void TouchServer::updateRightCursor(const unsigned int user, const float xp, const float yp)
 {
     //printf("Right cursor at: %f, %f.\n", xp, yp);
     
-    if(rightCursor_ != NULL)
-        updateTuioCursor(rightCursor_, xp, yp);
+    // user not in map, add user and add cursor
+    if(cursorMap_.count(user) == 0)
+    {
+        CursorPair cpair;
+        cpair.leftCursor_ = NULL;
+        cpair.rightCursor_ = addTuioCursor(xp, yp);
+        cursorMap_.insert(std::pair<unsigned int, CursorPair>(user, cpair));
+    }
+    
+    // user is in map, update cursor
+    if(cursorMap_[user].rightCursor_ != NULL)
+        updateTuioCursor(cursorMap_[user].rightCursor_, xp, yp);
     else
-        rightCursor_ = addTuioCursor(xp, yp);  
+        cursorMap_[user].rightCursor_ = addTuioCursor(xp, yp);  
 }

@@ -1,0 +1,46 @@
+TUIOSkeleton - A TUIO server for OpenNI devices.
+
+This TUIO server implementation is intended to send TUIO messages to a client with the users hands active as cursors. It is specialized for large display systems in that hand positions are not necessary scaled and sent directly as TUIO cursors, but can form vectors that extend beyond the field of view of the camera sensor.
+
+This implementation supports auto-calibration of users, and the number of tracked users is limited only by the hardware used (4 for Kinect). For advanced usage, please see the options.
+
+Build with CMake:
+
+git co git://github.com/bmwesting/TUIOSkeleton.git
+mkdir build
+cd build
+cmake -i ../TUIOSkeleton
+make
+
+Usage Examples:
+
+$ TUIOSkeleton
+(Runs TUIOSkeleton in hand tracking mode with a threshold of 400 mm from hand to shoulder of user to activate cursor) You effectively 'reach' for the screen to activate the cursor.
+
+$ TUIOSkeleton -t 500
+(Extend the default threshold for activating cursor to 500 mm)
+
+$ TUIOSkeleton --save-calibration user.skel
+(Save the calibrated skeleton to file 'user.skel' for future use)
+
+$ TUIOSkeleton --load-calibration user.skel
+(Load the calibration file 'user.skel' - Psi Pose not necessary for calibration)
+
+$ TUIOSkeleton --load-calibration user.skel --mode-vector
+(Load calibration and user vector mode - an optimized mode for large displays)
+
+$ TUIOSkeleton -h
+(Prints help message, below)
+
+$ TUIOSkeleton -h
+Command line options: 
+--help:             Print this message.
+--set-port:         Set TUIO UDP Port (default: 3333)
+--set-target-ip:    Set TUIO target IP (default: 127.0.0.1)
+--no-confidence:    Set Confidence Tracking off.
+--no-graphics:      Command line only (current default).
+--set-smoothing:    Set smoothing value (default: 0.8)
+--set-threshold:    Set threshold value (default: 400)
+--save-calibration: Save the calibrated skeleton after calibration
+--load-calibration: Load a calibration file when user detected
+--mode-vector:      Project cursors using head->hand vector

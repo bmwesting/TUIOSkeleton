@@ -53,7 +53,6 @@ class SkeletonTracker
         SensorDevice* sensor_;
         TouchServer* touchServer_;
         
-        int trackedUser_;
         unsigned int mode_;
         unsigned int threshold_;
         bool confidenceTracking_;
@@ -62,7 +61,7 @@ class SkeletonTracker
         std::string calibrationFile_;
         
         //related to vector projection
-        bool vectorCalibrationTop_, vectorCalibrationBot_, msgCalibrationTop_, msgCalibrationBot_;
+        bool vectorCalibrationTop_, vectorCalibrationBot_;
         SkeletonVector O_ks_, screenBBoxBottom_; // sensor to top-left screen vector
 };
 

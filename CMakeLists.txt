@@ -21,6 +21,7 @@ link_directories(${TUIOSkeleton_BINARY_DIR}/oscpack)
 include_directories("/usr/include/ni")
 set(LIBS ${LIBS} OpenNI)
 
+
 set(SRCS
     main.cpp
     SkeletonTracker.cpp
@@ -28,7 +29,9 @@ set(SRCS
     TouchServer.cpp
     callbacks.cpp
     SkeletonMath.cpp
+    
 )
+
 
 add_executable(TUIOSkeleton ${SRCS})
 
