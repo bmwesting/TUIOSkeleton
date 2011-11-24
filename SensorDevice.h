@@ -47,6 +47,9 @@ class SensorDevice
         // returns unordered_map of points with keys of type <string>
         void getAllAvailablePoints(){}
         
+        void getDepthMetaData(xn::DepthMetaData& depthMD) { depthG_.GetMetaData(depthMD); }
+        void getDepthSceneMetaData(xn::SceneMetaData& sceneMD) { userG_.GetUserPixels(0, sceneMD); }
+        
         void setPointModeToProjective() { pointModeProjective_ = true; }
         void setPointModeToReal() { pointModeProjective_ = false; }
         
@@ -64,6 +67,7 @@ class SensorDevice
         inline void setNeedCalibrationPose(const bool b) { needCalibrationPose_ = b; }
         
         xn::UserGenerator* getUserGenerator() { return &userG_; }
+        xn::DepthGenerator* getDepthGenerator() { return &depthG_; }
         
         unsigned int getNOTrackedUsers() { return trackedUsers_.size(); }
         unsigned int getUID(int i) { return trackedUsers_[i]; }

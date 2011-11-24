@@ -71,7 +71,6 @@ void SkeletonTracker::calibration()
 
 void SkeletonTracker::enterTrackingLoop()
 {
-    sensor_->startGeneratingAll();
     while(1)
     {
         // Read next available data

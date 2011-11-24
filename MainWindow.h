@@ -4,16 +4,19 @@
 #include "GLWindow.h"
 #include <QtGui>
 
+class SkeletonTracker;
+
 class MainWindow : public QMainWindow {
     Q_OBJECT
 
     public:
 
-        MainWindow();
-
+        MainWindow(SkeletonTracker* tracker);
+        
     private:
 
         GLWindow glWindow_;
+        SkeletonTracker* tracker_;
 };
 
 #endif

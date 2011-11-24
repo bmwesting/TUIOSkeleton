@@ -5,17 +5,14 @@
  * main.cpp
  *
  * Created: 08/29/2011
- * Updated: 10/21/2011
+ * Updated: 11/26/2011
  * Author: Brandt Westing, TACC
  */
 
-#include <cstring>
 
 #include "SkeletonTracker.h"
 #include "SensorDevice.h"
-
-std::string g_ip;
-unsigned int g_port;
+#include "main.h"
 
 void printHelp()
 {
@@ -37,6 +34,7 @@ int parseArgs(int nArgs, char** args, SkeletonTracker* tracker)
 
     g_port = 3333;
     g_ip = "127.0.0.1";
+    noGUI = FALSE;
     
     for(int i = 1; i < nArgs; i++)
     {
@@ -84,6 +82,7 @@ int parseArgs(int nArgs, char** args, SkeletonTracker* tracker)
         }
         else if (std::string(args[i]) == "--no-graphics" || std::string(args[i]) == "-ng")
         {
+            g_noGUI = TRUE;
         }
         else if (std::string(args[i]) == "--set-smoothing" || std::string(args[i]) == "-s")
         {
@@ -156,16 +155,34 @@ int main(int argc, char** argv)
         return -1;
     }
     
-    // initializes the TuioServer and the attached sensor (Kinect)
+    // initializes the TuioServer and the attached sensor
     if (tracker->initialize(g_ip, g_port) == -1)
     {
         return -1;
     }
     
-    tracker->getSensorDevice()->printAvailablePoses();
+    // print number of available poses
+    //tracker->getSensorDevice()->printAvailablePoses();
     
     tracker->calibration();
-    tracker->enterTrackingLoop();
+    
+    // start generating data
+    tracker->getSensorDevice()->startGeneratingAll();
+
+    
+    // bypass graphics and windowing
+    if (g_noGUI)
+        tracker->enterTrackingLoop();
+    
+    // do OpenGL drawing    
+    else
+    {
+        g_app = new QApplication(argc, argv);
+        g_mainWindow = new MainWindow(tracker);
+        
+        // enter event loop
+        g_app->exec();
+    }
     
     delete tracker;
         
