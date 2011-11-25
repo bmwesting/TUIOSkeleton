@@ -13,8 +13,11 @@ class MainWindow : public QMainWindow {
 
         MainWindow(SkeletonTracker* tracker);
         
+    public slots:
+        void timerHandler() { glWindow_.updateGL(); }
+        
     private:
-
+        QTimer* timer_;
         GLWindow glWindow_;
         SkeletonTracker* tracker_;
 };

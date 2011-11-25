@@ -1,10 +1,5 @@
 #include "GLWindow.h"
 
-#include <XnCppWrapper.h>
-
-#include "SensorDevice.h"
-#include "SkeletonTracker.h"
-
 #ifdef __APPLE__
     #include <GLUT/glut.h>
 #else
@@ -43,24 +38,30 @@ void GLWindow::paintGL()
     
     // -- now let's draw the scene
     
+    xn::DepthMetaData depthMD;
+    xn::SceneMetaData sceneMD;
     sensor_->getDepthMetaData(depthMD);
     sensor_->getDepthSceneMetaData(sceneMD);
-	
-	drawScene(sceneMD, depthMD);
-
-    /* Greg stuff
+    
+    //Greg stuff
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
-    // camera positioned at (0,0,-10) looking at (0,0,0) with up vector (0,1,0)
+    // camera positioned at center of device camera
     glLoadIdentity();
-    gluLookAt(0, 0, -10, 0, 0, 0, 0, 1, 0);
+    gluLookAt(depthMD.XRes()/2, depthMD.YRes()/2, -10, depthMD.XRes()/2, depthMD.YRes()/2, 0, 0, -1, 0);
 
     // light source at position (0,0,-10)
     float lightPosition[4] = { 0, 0, -10, 1 };
     glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
+	
+	drawScene(sceneMD, depthMD);
+    
+    //glutSwapBuffers();
+    
+    //static int i = 0;
 
-    render();
-    */
+    //render();
+    
 }
 
 void GLWindow::resizeGL(int width, int height)
@@ -68,14 +69,14 @@ void GLWindow::resizeGL(int width, int height)
     glViewport(0, 0, width, height);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluPerspective(45.0, (float)width / (float)height, 0.01, 1000.);
+    gluPerspective(45.0, (float)width / (float)height, 0.01, 10000.);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
     update();
 }
 
-/*
+
 void GLWindow::render()
 {
     // render a sphere of radius 10 at position (0,0,-50)
@@ -87,9 +88,8 @@ void GLWindow::render()
 
     glPopMatrix();
 }
-*/
 
-void drawLimb(const unsigned int player, XnSkeletonJoint eJoint1, XnSkeletonJoint eJoint2)
+void GLWindow::drawLimb(const unsigned int player, XnSkeletonJoint eJoint1, XnSkeletonJoint eJoint2)
 {
 
 	XnSkeletonJointPosition joint1, joint2;
@@ -100,16 +100,22 @@ void drawLimb(const unsigned int player, XnSkeletonJoint eJoint1, XnSkeletonJoin
 	{
 		return;
 	}
-
+    
 	XnPoint3D pt[2];
 	pt[0] = joint1.position;
 	pt[1] = joint2.position;
 
 	sensor_->getDepthGenerator()->ConvertRealWorldToProjective(2, pt, pt);
 	
-
-	glVertex3i(pt[0].X, pt[0].Y, 0);
-	glVertex3i(pt[1].X, pt[1].Y, 0);
+	glColor4f(1,1,1,1);
+	glPushMatrix();
+	glTranslated(pt[0].X, pt[0].Y, pt[0].Z);
+	glutSolidSphere(15,16,16);
+	glPopMatrix();
+	glPushMatrix();
+	glTranslated(pt[1].X, pt[1].Y, pt[1].Z);
+	glutSolidSphere(15,16,16);
+	glPopMatrix();
 
 }
 
@@ -119,7 +125,7 @@ void GLWindow::drawScene(const xn::SceneMetaData& sceneMD, const xn::DepthMetaDa
     // draw skeleton of all tracked users
     for(int i = 0; i < sensor_->getNOTrackedUsers(); i++)
     {
-        glBegin(GL_LINES);
+        
         drawLimb(sensor_->getUID(i), XN_SKEL_HEAD, XN_SKEL_NECK);
         drawLimb(sensor_->getUID(i), XN_SKEL_NECK, XN_SKEL_LEFT_SHOULDER);
         drawLimb(sensor_->getUID(i), XN_SKEL_LEFT_SHOULDER, XN_SKEL_LEFT_ELBOW);
@@ -141,7 +147,6 @@ void GLWindow::drawScene(const xn::SceneMetaData& sceneMD, const xn::DepthMetaDa
         drawLimb(sensor_->getUID(i), XN_SKEL_RIGHT_KNEE, XN_SKEL_RIGHT_FOOT);
 
         drawLimb(sensor_->getUID(i), XN_SKEL_LEFT_HIP, XN_SKEL_RIGHT_HIP);
-        glEnd();
 
     }
 }

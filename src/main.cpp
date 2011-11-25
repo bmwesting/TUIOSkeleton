@@ -9,10 +9,9 @@
  * Author: Brandt Westing, TACC
  */
 
-
+#include "main.h"
 #include "SkeletonTracker.h"
 #include "SensorDevice.h"
-#include "main.h"
 
 void printHelp()
 {
@@ -34,7 +33,7 @@ int parseArgs(int nArgs, char** args, SkeletonTracker* tracker)
 
     g_port = 3333;
     g_ip = "127.0.0.1";
-    noGUI = FALSE;
+    g_noGUI = FALSE;
     
     for(int i = 1; i < nArgs; i++)
     {

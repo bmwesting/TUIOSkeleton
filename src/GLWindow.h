@@ -3,31 +3,28 @@
 
 #include <QGLWidget>
 
-namespace xn
-{
-    class SceneMetaData;
-    class DepthMetaData;
-}
+#include "XnCppWrapper.h"
 
-class SkeletonTracker;
-class SensorDevice;
+#include "SkeletonTracker.h"
+#include "SensorDevice.h"
 
 class GLWindow : public QGLWidget
 {
-    public:
-        
+    public:   
         void setTracker(SkeletonTracker* tracker) { tracker_ = tracker;
                                                     sensor_ = tracker->getSensorDevice(); }
         
         void initializeGL();
         void paintGL();
         void resizeGL(int width, int height);
-        //void render();
-        void drawDepthMap(const xn::SceneMetaData& sceneMD, const xn::DepthMetaData& depthMD);
+        void render();
         
     private:
         SkeletonTracker* tracker_;
         SensorDevice* sensor_;
+               
+        void drawScene(const xn::SceneMetaData& sceneMD, const xn::DepthMetaData& depthMD);
+        void drawLimb(const unsigned int player, XnSkeletonJoint eJoint1, XnSkeletonJoint eJoint2);
 };
 
 #endif

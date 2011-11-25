@@ -9,6 +9,10 @@ MainWindow::MainWindow(SkeletonTracker* tracker)
     
     tracker_ = tracker;
     glWindow_.setTracker(tracker);
-
+    
+    timer_ = new QTimer(this);
+    connect(timer_, SIGNAL(timeout()), this, SLOT(timerHandler()));
+    timer_->start(0);
+    
     show();
 }
