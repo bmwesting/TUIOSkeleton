@@ -13,7 +13,7 @@ void XN_CALLBACK_TYPE UserCalibration_CalibrationComplete(xn::SkeletonCapability
     if (eStatus == XN_CALIBRATION_STATUS_OK)
     {
         // Calibration succeeded
-        printf("Calibration complete, start tracking user %d\n", nId);
+        printf("Calibration completed: Start tracking user %d\n", nId);
         sensor->getUserGenerator()->GetSkeletonCap().StartTracking(nId);
         
         //are we saving calibration data
@@ -53,6 +53,14 @@ void XN_CALLBACK_TYPE User_NewUser(xn::UserGenerator& generator, XnUserID nId, v
         sensor->getUserGenerator()->GetPoseDetectionCap().StartPoseDetection(sensor->getPoseString(), nId);
     }
     
+    //autocalibrate
+    else
+    {
+        printf("Auto-calibrating user %d.\n", nId);
+        sensor->getUserGenerator()->GetSkeletonCap().RequestCalibration(nId,TRUE);
+    }
+    
+    /*
     // we are loading the calibration data from a file
     else
     {
@@ -65,6 +73,7 @@ void XN_CALLBACK_TYPE User_NewUser(xn::UserGenerator& generator, XnUserID nId, v
 			sensor->getUserGenerator()->GetSkeletonCap().StartTracking(nId);
 		}
     }
+    */
 }
 
 // Callback: An existing user was lost
