@@ -17,7 +17,6 @@ class GLWindow : public QGLWidget
         void initializeGL();
         void paintGL();
         void resizeGL(int width, int height);
-        void render();
         
     private:
         SkeletonTracker* tracker_;
@@ -25,6 +24,7 @@ class GLWindow : public QGLWidget
                
         void drawScene(const xn::SceneMetaData& sceneMD, const xn::DepthMetaData& depthMD);
         void drawLimb(const unsigned int player, XnSkeletonJoint eJoint1, XnSkeletonJoint eJoint2);
+        void drawJoints(const unsigned int player);
 };
 
 #endif

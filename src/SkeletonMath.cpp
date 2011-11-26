@@ -2,11 +2,11 @@
 
 #include "SkeletonMath.h"
         
-SkeletonVector::SkeletonVector()
+Vector::Vector()
 {
 }
 
-SkeletonVector::SkeletonVector(const Point* p)
+Vector::Vector(const Point* p)
 {
 
     point_.x_ = p->x_;
@@ -16,7 +16,7 @@ SkeletonVector::SkeletonVector(const Point* p)
 
 }
 
-SkeletonVector::SkeletonVector(const Point& p)
+Vector::Vector(const Point& p)
 {
 
     point_.x_ = p.x_;
@@ -26,19 +26,25 @@ SkeletonVector::SkeletonVector(const Point& p)
 
 }
 
-SkeletonVector::SkeletonVector(const float x, const float y, const float z)
+Vector::Vector(const float x, const float y, const float z)
 {
     point_.x_ = x;
     point_.y_ = y;
     point_.z_ = z;
 }
 
+Vector::Vector(const int x, const int y, const int z)
+{
+    point_.x_ = x;
+    point_.y_ = y;
+    point_.z_ = z;
+}
 
-SkeletonVector::~SkeletonVector()
+Vector::~Vector()
 {
 }
 
-SkeletonVector& SkeletonVector::operator=(const SkeletonVector& rhs)
+Vector& Vector::operator=(const Vector& rhs)
 {
 
     // they are pointing to the same location!
@@ -52,7 +58,7 @@ SkeletonVector& SkeletonVector::operator=(const SkeletonVector& rhs)
 
 }
 
-SkeletonVector& SkeletonVector::operator+=(const SkeletonVector& rhs)
+Vector& Vector::operator+=(const Vector& rhs)
 {
     point_.x_ = point_.x_ + rhs.getPoint().x_;
     point_.y_ = point_.y_ + rhs.getPoint().y_;
@@ -62,7 +68,7 @@ SkeletonVector& SkeletonVector::operator+=(const SkeletonVector& rhs)
 
 }
 
-SkeletonVector& SkeletonVector::operator-=(const SkeletonVector& rhs)
+Vector& Vector::operator-=(const Vector& rhs)
 {
     point_.x_ = point_.x_ - rhs.getPoint().x_;
     point_.y_ = point_.y_ - rhs.getPoint().y_;
@@ -71,7 +77,7 @@ SkeletonVector& SkeletonVector::operator-=(const SkeletonVector& rhs)
     return *this;
 }
 
-SkeletonVector& SkeletonVector::operator*=(const SkeletonVector& rhs)
+Vector& Vector::operator*=(const Vector& rhs)
 {
     point_.x_ = point_.x_ * rhs.getPoint().x_;
     point_.y_ = point_.y_ * rhs.getPoint().y_;
@@ -80,37 +86,53 @@ SkeletonVector& SkeletonVector::operator*=(const SkeletonVector& rhs)
     return *this;
 }
 
-const SkeletonVector SkeletonVector::operator+(const SkeletonVector& rhs) const
+const Vector Vector::operator+(const Vector& rhs) const
 {
-    SkeletonVector result = *this;
+    Vector result = *this;
     result += rhs;
     return result;
 }
 
-const SkeletonVector SkeletonVector::operator-(const SkeletonVector& rhs) const
+const Vector Vector::operator-(const Vector& rhs) const
 {
-    SkeletonVector result = *this;
+    Vector result = *this;
     result -= rhs;
     return result;
 }
 
-const SkeletonVector SkeletonVector::operator*(const SkeletonVector& rhs) const
+const Vector Vector::operator*(const Vector& rhs) const
 {
-    SkeletonVector result = *this;
+    Vector result = *this;
     result *= rhs;
     return result;
 }
 
-const SkeletonVector SkeletonVector::operator*(const float f) const
+const Vector Vector::operator*(const float f) const
 {
-    SkeletonVector result = *this;
+    Vector result = *this;
     result.setPoint(result.getPoint().x_ * f, result.getPoint().y_ * f, result.getPoint().z_ * f);
     return result;
 }
 
-void SkeletonVector::print() const
+void Vector::print() const
 {
     printf("point_.x_:       %f\n", point_.x_);
     printf("point_.y_:       %f\n", point_.y_);
     printf("point_.z_:       %f\n", point_.z_);
+}
+
+Vector Vector::crossProduct(const Vector& rhs)
+{
+    Vector c = Vector(point_.y_*rhs.getPoint().z_ - point_.z_*rhs.getPoint().y_,
+                point_.z_*rhs.getPoint().x_ - point_.x_*rhs.getPoint().z_,
+                point_.x_*rhs.getPoint().y_ - point_.y_*rhs.getPoint().x_);
+                
+    return c;
+}
+
+float Vector::dotProduct(const Vector& rhs)
+{
+    return point_.x_*rhs.getPoint().x_ +
+           point_.y_*rhs.getPoint().y_ + 
+           point_.z_*rhs.getPoint().z_;
 }

@@ -17,12 +17,12 @@ inline int CHECK_RC(const unsigned int rc, const char* const description)
 SensorDevice::SensorDevice() :  context_(),
                                 userG_(),
                                 pointModeProjective_(TRUE),
-                                needCalibrationPose_(TRUE),
+                                needCalibrationPose_(FALSE),
                                 trackedUsers_(),
                                 pose_("Psi"),
                                 loadCalibration_(FALSE),
                                 saveCalibration_(FALSE),
-                                calibrationFilename_("TUIOSkeleton-UserCalibrationData.bin"),
+                                calibrationFilename_("skel.bin"),
                                 smoothingFactor_(0.8)
 {}
 
@@ -176,6 +176,7 @@ int SensorDevice::lookForCalibrationPoseOn()
         userG_.GetSkeletonCap().GetCalibrationPose((XnChar*) pose_.c_str());
     }
     
+    // turn on tracking of all joints
     userG_.GetSkeletonCap().SetSkeletonProfile(XN_SKEL_PROFILE_ALL);
     
 }

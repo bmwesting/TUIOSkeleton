@@ -203,8 +203,8 @@ void SkeletonTracker::updateVectors()
                              pow((joints[2].y_ - joints[1].y_), 2) +
                              pow((joints[2].z_ - joints[1].z_), 2));
         
-        O_ks_ = SkeletonVector(-3100, 2650, 0);
-        screenBBoxBottom_ = SkeletonVector(2000, 0, 0);
+        O_ks_ = Vector(-3100, 2650, 0);
+        screenBBoxBottom_ = Vector(2000, 0, 0);
         
         // we are not confident or not 'clicking' - remove cursor if exists
         if (!confidenceLeft || distanceLeft < threshold_)
@@ -226,7 +226,7 @@ void SkeletonTracker::updateVectors()
              *
              */
              
-            SkeletonVector p1_l, p2_l, p3_l, t0_l;
+            Vector p1_l, p2_l, p3_l, t0_l;
             p1_l = joints[2];
             p2_l = joints[0];
             
@@ -264,7 +264,7 @@ void SkeletonTracker::updateVectors()
         if (confidenceRight && distanceRight >= threshold_)
         {
             
-            SkeletonVector p1_r, p2_r, p3_r, t0_r;
+            Vector p1_r, p2_r, p3_r, t0_r;
             p1_r = joints[2];
             p2_r = joints[1];
             

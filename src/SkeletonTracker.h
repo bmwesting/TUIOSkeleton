@@ -62,7 +62,7 @@ class SkeletonTracker
         
         //related to vector projection
         bool vectorCalibrationTop_, vectorCalibrationBot_;
-        SkeletonVector O_ks_, screenBBoxBottom_; // sensor to top-left screen vector
+        Vector O_ks_, screenBBoxBottom_; // sensor to top-left screen vector
 };
 
 #endif

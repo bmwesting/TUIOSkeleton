@@ -1,4 +1,5 @@
 #include "GLWindow.h"
+#include "SkeletonMath.h"
 
 #ifdef __APPLE__
     #include <GLUT/glut.h>
@@ -56,12 +57,6 @@ void GLWindow::paintGL()
 	
 	drawScene(sceneMD, depthMD);
     
-    //glutSwapBuffers();
-    
-    //static int i = 0;
-
-    //render();
-    
 }
 
 void GLWindow::resizeGL(int width, int height)
@@ -76,47 +71,111 @@ void GLWindow::resizeGL(int width, int height)
     update();
 }
 
-
-void GLWindow::render()
+// draw skeleton joints as spheres
+void GLWindow::drawJoints(const unsigned int player)
 {
-    // render a sphere of radius 10 at position (0,0,-50)
-    glPushMatrix();
+    // Array of available joints
+    const unsigned int nJoints = 15;
+    XnSkeletonJoint joints[nJoints] = 
+            {XN_SKEL_HEAD,
+             XN_SKEL_NECK,
+             XN_SKEL_RIGHT_SHOULDER,
+             XN_SKEL_LEFT_SHOULDER,
+             XN_SKEL_RIGHT_ELBOW,
+             XN_SKEL_LEFT_ELBOW,
+             XN_SKEL_RIGHT_HAND,
+             XN_SKEL_LEFT_HAND,
+             XN_SKEL_RIGHT_HIP,
+             XN_SKEL_LEFT_HIP,
+             XN_SKEL_RIGHT_KNEE,
+             XN_SKEL_LEFT_KNEE,
+             XN_SKEL_RIGHT_FOOT,
+             XN_SKEL_LEFT_FOOT,
+             XN_SKEL_TORSO };           
 
-    glTranslated(0, 0, 0);
-    glColor4f(1,1,1,1);
-    glutSolidSphere(1, 16, 16);
+    // set up glu object
+    GLUquadricObj* quadobj;
+    quadobj = gluNewQuadric();
+                 
+    for (int i = 0; i < nJoints; i++)
+    {
+        XnSkeletonJointPosition tPos;
+        sensor_->getUserGenerator()->GetSkeletonCap().GetSkeletonJointPosition(player, joints[i], tPos);
+        
+        if (tPos.fConfidence == 1.0)
+        {
+            XnPoint3D pt;
+            pt = tPos.position;
+            
+            sensor_->getDepthGenerator()->ConvertRealWorldToProjective(1, &pt, &pt);
+            
+            glColor4f(1,1,1,1);
+            glPushMatrix();
+            glTranslated(pt.X, pt.Y, pt.Z);
+            gluSphere(quadobj,15.,16.,16.);
+            glPopMatrix();
+        }
+    }
 
-    glPopMatrix();
+    // delete used quadric
+    gluDeleteQuadric(quadobj);
+
 }
 
 void GLWindow::drawLimb(const unsigned int player, XnSkeletonJoint eJoint1, XnSkeletonJoint eJoint2)
 {
 
-	XnSkeletonJointPosition joint1, joint2;
-	sensor_->getUserGenerator()->GetSkeletonCap().GetSkeletonJointPosition(player, eJoint1, joint1);
-	sensor_->getUserGenerator()->GetSkeletonCap().GetSkeletonJointPosition(player, eJoint2, joint2);
+    const float PI = 3.141592653589;
 
-	if (joint1.fConfidence < 0.5 || joint2.fConfidence < 0.5)
-	{
-		return;
-	}
+    XnSkeletonJointPosition tPos[2];
+    sensor_->getUserGenerator()->GetSkeletonCap().GetSkeletonJointPosition(player, eJoint1, tPos[0]);
+    sensor_->getUserGenerator()->GetSkeletonCap().GetSkeletonJointPosition(player, eJoint2, tPos[1]);
     
-	XnPoint3D pt[2];
-	pt[0] = joint1.position;
-	pt[1] = joint2.position;
-
-	sensor_->getDepthGenerator()->ConvertRealWorldToProjective(2, pt, pt);
-	
-	glColor4f(1,1,1,1);
-	glPushMatrix();
-	glTranslated(pt[0].X, pt[0].Y, pt[0].Z);
-	glutSolidSphere(15,16,16);
-	glPopMatrix();
-	glPushMatrix();
-	glTranslated(pt[1].X, pt[1].Y, pt[1].Z);
-	glutSolidSphere(15,16,16);
-	glPopMatrix();
-
+    // only draw cylinder if we are confident of both endpoints
+    if (tPos[0].fConfidence <= 0.5 || tPos[1].fConfidence <= 0.5)
+        return;
+    
+    XnPoint3D pt[2];
+    pt[0] = tPos[0].position;
+    pt[1] = tPos[1].position;
+    
+    // convert coordinates to pixel coordinate values
+    sensor_->getDepthGenerator()->ConvertRealWorldToProjective(2, pt, pt);
+    
+    // Rotate scene so that cylinder drawn between pt2 and pt1 has a proper z-axis orientation
+    // see gluCylinder() documentation
+    
+    // skeletal points, p is the vector formed between them
+    Vector a = Vector(pt[0].X, pt[0].Y, pt[0].Z);
+    Vector b = Vector(pt[1].X, pt[1].Y, pt[1].Z);
+    Vector p = b - a;
+    
+    //glu cylinder vector - default direction for cylinders to face in glu
+    Vector z = Vector(0,0,1);
+    
+    // c is the axis of rotation about z
+    Vector c = z.crossProduct(p);
+    
+    // get the angle of rotation in degrees
+    float angle = 180/PI * acos((z.dotProduct(p)/p.magnitude()));
+    
+    glPushMatrix();
+    
+    // translate to pt2
+    glTranslated(pt[0].X,pt[0].Y,pt[0].Z);
+    glRotatef(angle, c.getPoint().x_, c.getPoint().y_, c.getPoint().z_);
+    
+    // set up glu object
+    GLUquadricObj* quadobj;
+    quadobj = gluNewQuadric();
+    
+    gluCylinder(quadobj, 10, 10, p.magnitude(), 10, 10);
+    
+    glPopMatrix();
+    
+    // delete used quadric
+    gluDeleteQuadric(quadobj);
+    
 }
 
 void GLWindow::drawScene(const xn::SceneMetaData& sceneMD, const xn::DepthMetaData& depthMD)
@@ -125,8 +184,9 @@ void GLWindow::drawScene(const xn::SceneMetaData& sceneMD, const xn::DepthMetaDa
     // draw skeleton of all tracked users
     for(int i = 0; i < sensor_->getNOTrackedUsers(); i++)
     {
-        
+        drawJoints(sensor_->getUID(i));
         drawLimb(sensor_->getUID(i), XN_SKEL_HEAD, XN_SKEL_NECK);
+        
         drawLimb(sensor_->getUID(i), XN_SKEL_NECK, XN_SKEL_LEFT_SHOULDER);
         drawLimb(sensor_->getUID(i), XN_SKEL_LEFT_SHOULDER, XN_SKEL_LEFT_ELBOW);
         drawLimb(sensor_->getUID(i), XN_SKEL_LEFT_ELBOW, XN_SKEL_LEFT_HAND);
@@ -147,6 +207,7 @@ void GLWindow::drawScene(const xn::SceneMetaData& sceneMD, const xn::DepthMetaDa
         drawLimb(sensor_->getUID(i), XN_SKEL_RIGHT_KNEE, XN_SKEL_RIGHT_FOOT);
 
         drawLimb(sensor_->getUID(i), XN_SKEL_LEFT_HIP, XN_SKEL_RIGHT_HIP);
+        
 
     }
 }
