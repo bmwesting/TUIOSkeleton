@@ -4,6 +4,15 @@ This TUIO server implementation is intended to send TUIO messages to a client wi
 
 This implementation supports auto-calibration of users, and the number of tracked users is limited only by the hardware used (4 for Kinect). For advanced usage, please see the options.
 
+Dependencies:
+CMake will check for most things (QT, GL, etc.), but it will not check for OpenNI and SensorKinect.
+
+Before building, make sure you have installed:
+OpenNI, NITE, and if you use the Kinect, SensorKinect.
+OpenNI: http://www.openni.org/Downloads/OpenNIModules.aspx
+NITE: http://www.openni.org/Downloads/OpenNIModules.aspx (under Middleware)
+SensorKinect: https://github.com/avin2/SensorKinect (make sure you have the unstable version of OpenNI if you are using Kinect)
+
 Build with CMake:
 
 git co git://github.com/bmwesting/TUIOSkeleton.git
@@ -38,7 +47,7 @@ Command line options:
 --set-port:         Set TUIO UDP Port (default: 3333)
 --set-target-ip:    Set TUIO target IP (default: 127.0.0.1)
 --no-confidence:    Set Confidence Tracking off.
---no-graphics:      Command line only (current default).
+--no-graphics:      Command line only.
 --set-smoothing:    Set smoothing value (default: 0.8)
 --set-threshold:    Set threshold value (default: 400)
 --save-calibration: Save the calibrated skeleton after calibration
