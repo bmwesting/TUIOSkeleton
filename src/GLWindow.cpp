@@ -7,14 +7,6 @@
     #include <GL/glut.h>
 #endif
 
-inline unsigned int getClosestPowerOfTwo(const unsigned int n)
-{
-	unsigned int m = 2;
-	while(m < n) m<<=1;
-
-	return m;
-}
-
 void GLWindow::initializeGL()
 {
     // enable depth testing
@@ -23,6 +15,9 @@ void GLWindow::initializeGL()
     // setup lighting
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
+    
+    glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+    glEnable(GL_COLOR_MATERIAL);
 
     // black background
     glClearColor(0,0,0,0);
@@ -44,7 +39,6 @@ void GLWindow::paintGL()
     sensor_->getDepthMetaData(depthMD);
     sensor_->getDepthSceneMetaData(sceneMD);
     
-    //Greg stuff
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
     // camera positioned at center of device camera
@@ -109,10 +103,9 @@ void GLWindow::drawJoints(const unsigned int player)
             
             sensor_->getDepthGenerator()->ConvertRealWorldToProjective(1, &pt, &pt);
             
-            glColor4f(1,1,1,1);
             glPushMatrix();
             glTranslated(pt.X, pt.Y, pt.Z);
-            gluSphere(quadobj,15.,16.,16.);
+            gluSphere(quadobj,20.,16.,16.);
             glPopMatrix();
         }
     }
@@ -184,28 +177,25 @@ void GLWindow::drawScene(const xn::SceneMetaData& sceneMD, const xn::DepthMetaDa
     // draw skeleton of all tracked users
     for(int i = 0; i < sensor_->getNOTrackedUsers(); i++)
     {
+        glColor4f(0.2,0.4,0.9,1.0);
         drawJoints(sensor_->getUID(i));
-        drawLimb(sensor_->getUID(i), XN_SKEL_HEAD, XN_SKEL_NECK);
         
+        glColor4f(0.0,0.85,0.5,1.0);
+        drawLimb(sensor_->getUID(i), XN_SKEL_HEAD, XN_SKEL_NECK);
         drawLimb(sensor_->getUID(i), XN_SKEL_NECK, XN_SKEL_LEFT_SHOULDER);
         drawLimb(sensor_->getUID(i), XN_SKEL_LEFT_SHOULDER, XN_SKEL_LEFT_ELBOW);
         drawLimb(sensor_->getUID(i), XN_SKEL_LEFT_ELBOW, XN_SKEL_LEFT_HAND);
-
         drawLimb(sensor_->getUID(i), XN_SKEL_NECK, XN_SKEL_RIGHT_SHOULDER);
         drawLimb(sensor_->getUID(i), XN_SKEL_RIGHT_SHOULDER, XN_SKEL_RIGHT_ELBOW);
         drawLimb(sensor_->getUID(i), XN_SKEL_RIGHT_ELBOW, XN_SKEL_RIGHT_HAND);
-
         drawLimb(sensor_->getUID(i), XN_SKEL_LEFT_SHOULDER, XN_SKEL_TORSO);
         drawLimb(sensor_->getUID(i), XN_SKEL_RIGHT_SHOULDER, XN_SKEL_TORSO);
-
         drawLimb(sensor_->getUID(i), XN_SKEL_TORSO, XN_SKEL_LEFT_HIP);
         drawLimb(sensor_->getUID(i), XN_SKEL_LEFT_HIP, XN_SKEL_LEFT_KNEE);
         drawLimb(sensor_->getUID(i), XN_SKEL_LEFT_KNEE, XN_SKEL_LEFT_FOOT);
-
         drawLimb(sensor_->getUID(i), XN_SKEL_TORSO, XN_SKEL_RIGHT_HIP);
         drawLimb(sensor_->getUID(i), XN_SKEL_RIGHT_HIP, XN_SKEL_RIGHT_KNEE);
         drawLimb(sensor_->getUID(i), XN_SKEL_RIGHT_KNEE, XN_SKEL_RIGHT_FOOT);
-
         drawLimb(sensor_->getUID(i), XN_SKEL_LEFT_HIP, XN_SKEL_RIGHT_HIP);
         
 
