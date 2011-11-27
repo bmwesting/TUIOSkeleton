@@ -112,6 +112,26 @@ void SkeletonTracker::updateHands()
         distanceRight = sqrt(pow((jointsReal[3].x_ - jointsReal[1].x_), 2) +
                              pow((jointsReal[3].y_ - jointsReal[1].y_), 2) +
                              pow((jointsReal[3].z_ - jointsReal[1].z_), 2));
+                             
+        // determine if threshold constraint is valid
+        bool thresholdLeft = false;
+        bool thresholdRight = false;
+        if (distanceLeft >= threshold_)
+        {
+            thresholdLeft = true;
+            
+            // make sure hands are not "dangling"
+            if ((jointsReal[2].z_ - jointsReal[0].z_) < 100)
+                thresholdLeft = false;
+        }
+        if (distanceRight >= threshold_)
+        {
+            thresholdRight = true;
+            
+            // make sure hands are not "dangling"
+            if ((jointsReal[3].z_ - jointsReal[1].z_) < 100)
+                thresholdRight = false;
+        }
                                  
         //get projective (pixel) coordinates for remaining processing
         Point joints[4];
@@ -139,22 +159,22 @@ void SkeletonTracker::updateHands()
             rightWithinFOV = false;
         
         //if elbow - hand less than threshold, remove from cursors (not reaching)
-        if(distanceLeft < threshold_ || !confidenceLeft || !leftWithinFOV)
+        if(!thresholdLeft || !confidenceLeft || !leftWithinFOV)
         {
             touchServer_->removeLeftCursor(sensor_->getUID(i));
         }
-        if(distanceRight < threshold_ || !confidenceRight || !rightWithinFOV)
+        if(!thresholdRight || !confidenceRight || !rightWithinFOV)
         {
             touchServer_->removeRightCursor(sensor_->getUID(i));
         }
         
         //if elbow - hand greater than threshold, add cursor to list (reaching gesture)
-        if(distanceLeft >= threshold_ && confidenceLeft && leftWithinFOV)
+        if(thresholdLeft && confidenceLeft && leftWithinFOV)
         {
             touchServer_->updateLeftCursor(sensor_->getUID(i), NORMALIZEX(joints[0].x_), NORMALIZEY(joints[0].y_));
         }
         
-        if(distanceRight >= threshold_ && confidenceRight && rightWithinFOV)
+        if(thresholdRight && confidenceRight && rightWithinFOV)
         {
             touchServer_->updateRightCursor(sensor_->getUID(i), NORMALIZEX(joints[1].x_), NORMALIZEY(joints[1].y_));
         }
@@ -298,4 +318,20 @@ void SkeletonTracker::updateVectors()
     // commit any changes to TUIO state
     touchServer_->commitFrame();    
 
+}
+
+bool SkeletonTracker::isLeftClicking(const unsigned int uid)
+{
+    if (touchServer_->getTUIOCursorLeft(uid) == NULL)
+        return FALSE;
+    else
+        return TRUE;
+}
+
+bool SkeletonTracker::isRightClicking(const unsigned int uid)
+{
+    if (touchServer_->getTUIOCursorRight(uid) == NULL)
+        return FALSE;
+    else
+        return TRUE;
 }
