@@ -45,6 +45,10 @@ class SkeletonTracker
         inline unsigned int getThreshold() { return threshold_; }
         
         SensorDevice* getSensorDevice(){ return sensor_; }
+        
+        // returns true if user specified has active hand cursors
+        bool isLeftClicking(const unsigned int uid);
+        bool isRightClicking(const unsigned int uid);
     
     private:
         void updateHands();

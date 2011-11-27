@@ -103,6 +103,38 @@ void GLWindow::drawJoints(const unsigned int player)
             
             sensor_->getDepthGenerator()->ConvertRealWorldToProjective(1, &pt, &pt);
             
+            if (joints[i] == XN_SKEL_RIGHT_HAND)
+            {
+                if(tracker_->isRightClicking(player))
+                {
+                    // color the hand red and make it larger
+                    glColor4f(1.0, 0.0, 0.0, 1);
+                    glPushMatrix();
+                    glTranslated(pt.X, pt.Y, pt.Z);
+                    gluSphere(quadobj,25.,16.,16.);
+                    glPopMatrix();
+                    
+                    // return to normal color
+                    glColor4f(0.2,0.4,0.9,1.0);
+                }
+            }
+            
+            if (joints[i] == XN_SKEL_LEFT_HAND)
+            {
+                if(tracker_->isLeftClicking(player))
+                {
+                    // color the hand red and make it larger
+                    glColor4f(1.0, 0.0, 0.0, 1);
+                    glPushMatrix();
+                    glTranslated(pt.X, pt.Y, pt.Z);
+                    gluSphere(quadobj,25.,16.,16.);
+                    glPopMatrix();
+                    
+                    // return to normal color
+                    glColor4f(0.2,0.4,0.9,1.0);
+                }
+            }
+            
             glPushMatrix();
             glTranslated(pt.X, pt.Y, pt.Z);
             gluSphere(quadobj,20.,16.,16.);
@@ -198,6 +230,5 @@ void GLWindow::drawScene(const xn::SceneMetaData& sceneMD, const xn::DepthMetaDa
         drawLimb(sensor_->getUID(i), XN_SKEL_RIGHT_KNEE, XN_SKEL_RIGHT_FOOT);
         drawLimb(sensor_->getUID(i), XN_SKEL_LEFT_HIP, XN_SKEL_RIGHT_HIP);
         
-
     }
 }

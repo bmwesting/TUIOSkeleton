@@ -39,6 +39,10 @@ class TouchServer : public TUIO::TuioServer
         void updateTuioCursor(TUIO::TuioCursor *tcur, float xp, float yp);
         void commitFrame();
         
+        TUIO::TuioCursor* getTUIOCursorLeft(const unsigned int uid) { return cursorMap_[uid].leftCursor_; }
+        TUIO::TuioCursor* getTUIOCursorRight(const unsigned int uid) { return cursorMap_[uid].rightCursor_; }
+
+        
     private:
         std::map<unsigned int, CursorPair> cursorMap_;
         
